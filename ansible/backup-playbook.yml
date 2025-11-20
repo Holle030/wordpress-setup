@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Backup Ordner erstellen
+      file:
+        path: ~/backups
+        state: directory
+    
+    - name: WordPress Backup
+      shell: |
+        docker exec docker-db-1 mysqldump -u root -prootpass wordpress > ~/backups/wp-db-$(date +%Y%m%d).sql
+        docker cp docker-wordpress-1:/var/www/html ~/backups/wp-files-$(date +%Y%m%d)
