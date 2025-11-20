@@ -42,3 +42,4 @@ ansible-playbook ansible/backup-playbook.yml
 
 1. Add Data Source → Prometheus → `http://prometheus:9090`
 2. Import Dashboard → ID: `1860` oder `193`
+# wordpress-setup
