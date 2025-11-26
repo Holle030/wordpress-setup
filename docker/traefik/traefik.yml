@@ -1,0 +1,29 @@
+log:
+  level: DEBUG
+
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+http:
+  routers:
+    wordpress:
+      rule: "Host(`wordpress.localhost`)"
+      service: wordpress
+    phpmyadmin:
+      rule: "Host(`phpmyadmin.localhost`)"
+      service: phpmyadmin
+
+  services:
+    wordpress:
+      loadBalancer:
+        servers:
+          - url: "http://wordpress:80"
+    phpmyadmin:
+      loadBalancer:
+        servers:
+          - url: "http://phpmyadmin:80"

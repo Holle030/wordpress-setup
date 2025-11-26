@@ -1,13 +1,34 @@
 ---
-- hosts: localhost
-  connection: local
+- name: WordPress Backup
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    backup_dir: /home/holle030/wordpress-backups
+    date: "{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
+
   tasks:
-    - name: Backup Ordner erstellen
+    - name: Create backup directory
       file:
-        path: ~/backups
+        path: "{{ backup_dir }}"
         state: directory
-    
-    - name: WordPress Backup
+        mode: '0755'
+
+    - name: Backup WordPress files
+      archive:
+        path: /var/lib/docker/volumes/docker_wordpress_data/_data
+        dest: "{{ backup_dir }}/wordpress-files-{{ date }}.tar.gz"
+      ignore_errors: yes
+
+    - name: Backup MySQL database
       shell: |
-        docker exec docker-db-1 mysqldump -u root -prootpass wordpress > ~/backups/wp-db-$(date +%Y%m%d).sql
-        docker cp docker-wordpress-1:/var/www/html ~/backups/wp-files-$(date +%Y%m%d)
+            docker exec mysql_db mysqldump -u root -prootpass123 wordpress > {{ backup_dir }}/wordpress-db-{{ date }}.sql
+    - name: List backups
+      shell: ls -lh {{ backup_dir }}
+      register: backup_list
+
+    - name: Show backup files
+      debug:
+        msg: "{{ backup_list.stdout }}"
+
+    - name: Remove old backups (älter als 7 Tage)
+      shell: find {{ backup_dir }} -type f -mtime +7 -delete
